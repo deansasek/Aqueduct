@@ -2,3 +2,10 @@ vendor/
 .vs/
 Vulkan/
 x64/
+archive.cpp
+Vulkan.vcxproj.user
+Vulkan.vxcproj.filters
+Vulkan.vcxproj
+.gitignore
+.gitattributes
+README.md
