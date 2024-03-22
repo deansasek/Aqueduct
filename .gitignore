@@ -1,0 +1,9 @@
+archive.cpp
+Vulkan.vcxproj
+Vulkan.vcxproj.filters
+Vulkan.vcxproj.user
+Vendor/
+Vulkan/
+x64/
+.vs/
+.git/
