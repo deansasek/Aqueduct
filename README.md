@@ -6,10 +6,13 @@ Vulkan project based upon https://vulkan-tutorial.com/, with minor changes to th
 - All engine specific functions moved into an "Engine" namespace, with an unused "Renderer" namespace.
 - Switched GLFW for SDL2.
 
+Project dependencies:
+- SDL2
+- GLM
+
 To come:
 - [ ] Vertex & uniform buffer support.
 - [ ] Texture mapping.
 - [ ] Depth buffering.
 - [ ] Loading .OBJ, .FBX, and .GLTF models.
 - [ ] DearImGui integration.
-  
