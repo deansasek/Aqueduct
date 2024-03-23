@@ -1,6 +1,7 @@
-#include "./src/engine.cpp"  
+#include "./Src/Common.h"
+#include "./Src/Engine.h"  
 
-static int Main()
+int main()
 {
     try
     {

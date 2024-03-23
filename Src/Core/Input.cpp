@@ -1,4 +1,1 @@
-namespace Input
-{
-
-}
+#include "Input.h"

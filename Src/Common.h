@@ -21,3 +21,5 @@
 #include <limits>
 #include <algorithm>
 #include <fstream>
+
+enum class API { Vulkan, DirectX12, OpenGL, Undefined };
