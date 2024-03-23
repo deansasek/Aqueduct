@@ -6,6 +6,8 @@
 
 #include "../../FileSystem/FileSystem.h"
 
+#include <glm/glm.hpp>
+
 SDL_Window* Vulkan::Renderer::Window;
 VkInstance Vulkan::Renderer::Instance;
 VkSurfaceKHR Vulkan::Renderer::Surface;
@@ -40,6 +42,12 @@ VkDebugUtilsMessengerEXT Vulkan::Renderer::DebugMessenger;
 bool Vulkan::Renderer::FramebufferResized = false;
 
 uint32_t Vulkan::Renderer::CurrentFrame = 0;
+
+const std::vector<Vulkan::Renderer::Vertex> Vulkan::Renderer::Vertices = {
+    {{0.0f, -0.5f}, {1.0f, 0.0f, 0.0f}},
+    {{0.5f, 0.5f}, {0.0f, 1.0f, 0.0f}},
+    {{-0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}}
+};
 
 void Vulkan::Renderer::Init()
 {
@@ -709,10 +717,15 @@ void Vulkan::Renderer::CreateGraphicsPipeline()
 
     VkPipelineVertexInputStateCreateInfo VertexInputInfo{};
     VertexInputInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
-    VertexInputInfo.vertexBindingDescriptionCount = 0;
-    VertexInputInfo.pVertexBindingDescriptions = nullptr;
-    VertexInputInfo.vertexAttributeDescriptionCount = 0;
-    VertexInputInfo.pVertexAttributeDescriptions = nullptr;
+
+    auto BindingDescription = Vulkan::Renderer::Vertex::GetBindingDescription();
+    auto AttributeDescriptions = Vulkan::Renderer::Vertex::GetAttributeDescriptions();
+
+    VertexInputInfo.vertexBindingDescriptionCount = 1;
+    VertexInputInfo.vertexAttributeDescriptionCount = static_cast<uint32_t>(AttributeDescriptions.size());
+
+    VertexInputInfo.pVertexBindingDescriptions = &BindingDescription;
+    VertexInputInfo.pVertexAttributeDescriptions = AttributeDescriptions.data();
 
     VkPipelineInputAssemblyStateCreateInfo InputAssembly{};
     InputAssembly.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;

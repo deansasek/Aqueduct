@@ -24,6 +24,39 @@ namespace Vulkan
 			std::vector<VkPresentModeKHR> PresentModes;
 		};
 
+		struct Vertex {
+			glm::vec2 Pos;
+			glm::vec3 Color;
+
+			static VkVertexInputBindingDescription GetBindingDescription()
+			{
+				VkVertexInputBindingDescription BindingDescription{};
+				BindingDescription.binding = 0;
+				BindingDescription.stride = sizeof(Vertex);
+				BindingDescription.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
+
+				return BindingDescription;
+			}
+
+			static std::array<VkVertexInputAttributeDescription, 2> GetAttributeDescriptions()
+			{
+				std::array<VkVertexInputAttributeDescription, 2> AttributeDescriptions{};
+				AttributeDescriptions[0].binding = 0;
+				AttributeDescriptions[0].location = 0;
+				AttributeDescriptions[0].format = VK_FORMAT_R32G32_SFLOAT;
+				AttributeDescriptions[0].offset = offsetof(Vertex, Pos);
+
+				AttributeDescriptions[1].binding = 1;
+				AttributeDescriptions[1].location = 1;
+				AttributeDescriptions[1].format = VK_FORMAT_R32G32B32_SFLOAT;
+				AttributeDescriptions[1].offset = offsetof(Vertex, Color)
+
+				return AttributeDescriptions;
+			}
+		};
+
+		const std::vector<Vertex> Vertices;
+
 		const std::vector<const char*> ValidationLayers = {
 			"VK_LAYER_KHRONOS_validation"
 		};
