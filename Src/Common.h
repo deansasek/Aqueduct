@@ -1,5 +1,8 @@
 #pragma once
 
+#ifndef COMMON_H
+#define COMMON_H
+
 #include <vulkan/vulkan.h>
 
 // new sdl2
@@ -23,3 +26,5 @@
 #include <fstream>
 
 enum class API { Vulkan, DirectX12, OpenGL, Undefined };
+
+#endif
