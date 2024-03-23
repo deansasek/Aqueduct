@@ -4,6 +4,8 @@
 
 #include "../../Src/Engine.h"
 
+#include "../../FileSystem/FileSystem.h"
+
 SDL_Window* Vulkan::Renderer::Window;
 VkInstance Vulkan::Renderer::Instance;
 VkSurfaceKHR Vulkan::Renderer::Surface;
@@ -114,7 +116,7 @@ void Vulkan::Renderer::InitWindow()
     SDL_Init(SDL_INIT_VIDEO);
     SDL_Vulkan_LoadLibrary(nullptr);
 
-    Vulkan::Renderer::Window = SDL_CreateWindow("Test", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 800, 600, SDL_WINDOW_SHOWN | SDL_WINDOW_VULKAN | SDL_WINDOW_FULLSCREEN);
+    Vulkan::Renderer::Window = SDL_CreateWindow("Test", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 800, 600, SDL_WINDOW_SHOWN | SDL_WINDOW_VULKAN | SDL_WINDOW_RESIZABLE);
     SDL_SetWindowData(Vulkan::Renderer::Window, "SDL_Window", &Vulkan::Renderer::Window);
 }
 
@@ -673,8 +675,8 @@ void Vulkan::Renderer::CreateFramebuffers()
 
 void Vulkan::Renderer::CreateGraphicsPipeline()
 {
-    auto VertexShaderCode = Vulkan::Renderer::ReadFile("Shaders/Vert.spv");
-    auto FragmentShaderCode = Vulkan::Renderer::ReadFile("Shaders/Frag.spv");
+    auto VertexShaderCode = FileSystem::ReadFile("Shaders/Vert.spv");
+    auto FragmentShaderCode = FileSystem::ReadFile("Shaders/Frag.spv");
 
     VkShaderModule VertexShaderModule = Vulkan::Renderer::CreateShaderModule(VertexShaderCode);
     VkShaderModule FragmentShaderModule = Vulkan::Renderer::CreateShaderModule(FragmentShaderCode);
@@ -1154,6 +1156,7 @@ static VKAPI_ATTR VkBool32 VKAPI_CALL Vulkan::Renderer::DebugCallback(VkDebugUti
     return VK_FALSE;
 }
 
+/*
 static std::vector<char> Vulkan::Renderer::ReadFile(const std::string& FileName)
 {
     std::ifstream File(FileName, std::ios::ate | std::ios::binary);
@@ -1177,3 +1180,4 @@ static std::vector<char> Vulkan::Renderer::ReadFile(const std::string& FileName)
 
     return Buffer;
 }
+*/

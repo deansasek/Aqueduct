@@ -1,6 +1,13 @@
-//#pragma once
+#pragma once
 
-//namespace FileSystem
-//{
-//	std::vector<char> ReadFile(const std::string& FileName);
-//}
+#ifndef FILESYSTEM_H
+#define FILESYSTEM_H
+
+#include "../../Common.h"
+
+namespace FileSystem
+{
+	std::vector<char> ReadFile(const std::string& FileName);
+}
+
+#endif
