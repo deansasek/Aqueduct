@@ -39,6 +39,9 @@ std::vector<VkFence> Vulkan::Renderer::InFlightFences;
 
 VkDebugUtilsMessengerEXT Vulkan::Renderer::DebugMessenger;
 
+VkBuffer Vulkan::Renderer::VertexBuffer;
+VkDeviceMemory Vulkan::Renderer::VertexBufferMemory;
+
 bool Vulkan::Renderer::FramebufferResized = false;
 
 uint32_t Vulkan::Renderer::CurrentFrame = 0;
@@ -62,6 +65,7 @@ void Vulkan::Renderer::Init()
     Vulkan::Renderer::CreateGraphicsPipeline();
     Vulkan::Renderer::CreateFramebuffers();
     Vulkan::Renderer::CreateCommandPool();
+    Vulkan::Renderer::CreateVertexBuffer();
     Vulkan::Renderer::CreateCommandBuffers();
     Vulkan::Renderer::CreateSyncObjects();
 }
@@ -84,6 +88,10 @@ void Vulkan::Renderer::CleanUpSwapChain()
 void Vulkan::Renderer::CleanUp()
 {
     Vulkan::Renderer::CleanUpSwapChain();
+
+    vkDestroyBuffer(Vulkan::Renderer::Device, Vulkan::Renderer::VertexBuffer, nullptr);
+
+    vkFreeMemory(Vulkan::Renderer::Device, Vulkan::Renderer::VertexBufferMemory, nullptr);
 
     vkDestroyPipeline(Vulkan::Renderer::Device, Vulkan::Renderer::GraphicsPipeline, nullptr);
 
@@ -328,7 +336,6 @@ void Vulkan::Renderer::CreateLogicalDevice()
         QueueCreateInfos.push_back(QueueCreateInfo);
     }
 
-    // we're coming back to this
     VkPhysicalDeviceFeatures DeviceFeatures{};
 
     VkDeviceCreateInfo CreateInfo{};
@@ -342,7 +349,6 @@ void Vulkan::Renderer::CreateLogicalDevice()
     CreateInfo.enabledExtensionCount = static_cast<uint32_t>(Vulkan::Renderer::DeviceExtensions.size());
     CreateInfo.ppEnabledExtensionNames = Vulkan::Renderer::DeviceExtensions.data();
 
-    // add validation layers if enabled
     if (Vulkan::Renderer::EnableValidationLayers)
     {
         CreateInfo.enabledLayerCount = static_cast<uint32_t>(ValidationLayers.size());
@@ -430,10 +436,8 @@ Vulkan::Renderer::QueueFamilyIndices Vulkan::Renderer::FindQueueFamilies(VkPhysi
 
     int i = 0;
 
-    // loops through queuefamilies
     for (const auto& QueueFamily : QueueFamilies)
     {
-        // loops through queueflags in queuefamily to determine if VK_QUEUE_GRAPHICS_BIT is available
         if (QueueFamily.queueFlags & VK_QUEUE_GRAPHICS_BIT)
         {
             Indices.GraphicsFamily = i;
@@ -1106,6 +1110,57 @@ void Vulkan::Renderer::CreateCommandPool()
     {
         std::cout << "VK > Successfully created command pool! \n";
     }
+}
+
+void Vulkan::Renderer::CreateVertexBuffer()
+{
+    VkBufferCreateInfo BufferInfo{};
+    BufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
+    BufferInfo.size = sizeof(Vulkan::Renderer::Vertices[0]) * Vulkan::Renderer::Vertices.size();
+    BufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+
+    if (vkCreateBuffer(Vulkan::Renderer::Device, &BufferInfo, nullptr, &Vulkan::Renderer::VertexBuffer) != VK_SUCCESS)
+    {
+        throw std::runtime_error("VK > Failed to create vertex buffer!");
+    }
+    else if (vkCreateBuffer(Vulkan::Renderer::Device, &BufferInfo, nullptr, &Vulkan::Renderer::VertexBuffer) == VK_SUCCESS)
+    {
+        std::cout << "VK > Successfully created vertex buffer! \n";
+    }
+
+    VkMemoryRequirements MemoryRequirements;
+    vkGetBufferMemoryRequirements(Vulkan::Renderer::Device, Vulkan::Renderer::VertexBuffer, &MemoryRequirements);
+
+    VkMemoryAllocateInfo AllocateInfo{};
+    AllocateInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
+    AllocateInfo.allocationSize = MemoryRequirements.size;
+    AllocateInfo.memoryTypeIndex = Vulkan::Renderer::FindMemoryType(MemoryRequirements.memoryTypeBits, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+
+    if (vkAllocateMemory(Vulkan::Renderer::Device, &AllocateInfo, nullptr, &Vulkan::Renderer::VertexBufferMemory) != VK_SUCCESS)
+    {
+        throw std::runtime_error("VK > Failed to allocate vertex buffer memory!");
+    }
+    else if (vkAllocateMemory(Vulkan::Renderer::Device, &AllocateInfo, nullptr, &Vulkan::Renderer::VertexBufferMemory) == VK_SUCCESS)
+    {
+        vkBindBufferMemory(Vulkan::Renderer::Device, Vulkan::Renderer::VertexBuffer, Vulkan::Renderer::VertexBufferMemory, 0);
+        std::cout << "VK > Successfully allocated vertex buffer memory! \n";
+    }
+}
+
+uint32_t Vulkan::Renderer::FindMemoryType(uint32_t TypeFilter, VkMemoryPropertyFlags Properties)
+{
+    VkPhysicalDeviceMemoryProperties MemoryProperties;
+    vkGetPhysicalDeviceMemoryProperties(Vulkan::Renderer::PhysicalDevice, &MemoryProperties);
+
+    for (uint32_t i = 0; i < MemoryProperties.memoryTypeCount; i++)
+    {
+        if (TypeFilter & (1 << i) && (MemoryProperties.memoryTypes[i].propertyFlags & Properties) == Properties)
+        {
+            return i;
+        }
+    }
+
+    throw std::runtime_error("VK > Failed to find suitable memory type!");
 }
 
 void Vulkan::Renderer::InitDebugMessenger()

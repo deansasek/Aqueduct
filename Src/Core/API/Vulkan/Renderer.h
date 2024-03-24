@@ -102,6 +102,9 @@ namespace Vulkan
 
 		extern VkDebugUtilsMessengerEXT DebugMessenger;
 
+		extern VkBuffer VertexBuffer;
+		extern VkDeviceMemory VertexBufferMemory;
+
 		extern bool FramebufferResized;
 
 		const uint32_t MaxFramesInFlight = 2;
@@ -130,6 +133,7 @@ namespace Vulkan
 		void DrawFrame();
 		void PopulateDebugMessengerCreateInfo(VkDebugUtilsMessengerCreateInfoEXT& CreateInfo);
 		void DestroyDebugUtilsMessengerEXT(VkInstance Instance, VkDebugUtilsMessengerEXT DebugMessenger, const VkAllocationCallbacks* PAllocator);
+		void CreateVertexBuffer();
 
 		bool CheckDeviceExtensionSupport(VkPhysicalDevice Device);
 		bool CheckValidationLayerSupport();
@@ -150,6 +154,8 @@ namespace Vulkan
 		VkExtent2D ChooseSwapExtent(const VkSurfaceCapabilitiesKHR& Capabilities);
 
 		VkShaderModule CreateShaderModule(const std::vector<char>& Code);
+
+		uint32_t FindMemoryType(uint32_t TypeFilter, VkMemoryPropertyFlags Properties);
 
 		VkResult CreateDebugUtilsMessengerEXT(VkInstance Instance, const VkDebugUtilsMessengerCreateInfoEXT* PCreateInfo, const VkAllocationCallbacks* PAllocator, VkDebugUtilsMessengerEXT* PDebugMessenger);
 
