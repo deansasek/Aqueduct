@@ -56,6 +56,7 @@ namespace Vulkan
 		};
 
 		extern const std::vector<Vertex> Vertices;
+		extern const std::vector<uint16_t> Indices;
 
 		const std::vector<const char*> ValidationLayers = {
 			"VK_LAYER_KHRONOS_validation"
@@ -105,6 +106,9 @@ namespace Vulkan
 		extern VkBuffer VertexBuffer;
 		extern VkDeviceMemory VertexBufferMemory;
 
+		extern VkBuffer IndexBuffer;
+		extern VkDeviceMemory IndexBufferMemory;
+
 		extern bool FramebufferResized;
 
 		const uint32_t MaxFramesInFlight = 2;
@@ -134,6 +138,9 @@ namespace Vulkan
 		void PopulateDebugMessengerCreateInfo(VkDebugUtilsMessengerCreateInfoEXT& CreateInfo);
 		void DestroyDebugUtilsMessengerEXT(VkInstance Instance, VkDebugUtilsMessengerEXT DebugMessenger, const VkAllocationCallbacks* PAllocator);
 		void CreateVertexBuffer();
+		void CreateIndexBuffer();
+		void CreateBuffer(VkDeviceSize Size, VkBufferUsageFlags Usage, VkMemoryPropertyFlags Properties, VkBuffer& Buffer, VkDeviceMemory& BufferMemory);
+		void CopyBuffer(VkBuffer SrcBuffer, VkBuffer DstBuffer, VkDeviceSize Size);
 
 		bool CheckDeviceExtensionSupport(VkPhysicalDevice Device);
 		bool CheckValidationLayerSupport();
