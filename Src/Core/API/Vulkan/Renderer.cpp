@@ -6,8 +6,6 @@
 
 #include "../../FileSystem/FileSystem.h"
 
-#include <glm/glm.hpp>
-
 SDL_Window* Vulkan::Renderer::Window;
 VkInstance Vulkan::Renderer::Instance;
 VkSurfaceKHR Vulkan::Renderer::Surface;
@@ -47,7 +45,7 @@ bool Vulkan::Renderer::FramebufferResized = false;
 uint32_t Vulkan::Renderer::CurrentFrame = 0;
 
 const std::vector<Vulkan::Renderer::Vertex> Vulkan::Renderer::Vertices = {
-    {{0.0f, -0.5f}, {1.0f, 0.0f, 0.0f}},
+    {{1.0f, -0.5f}, {1.0f, 0.0f, 0.0f}},
     {{0.5f, 0.5f}, {0.0f, 1.0f, 0.0f}},
     {{-0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}}
 };
@@ -1083,7 +1081,11 @@ void Vulkan::Renderer::RecordCommandBuffer(VkCommandBuffer CommandBuffer, uint32
     Scissor.extent = Vulkan::Renderer::SwapChainExtent;
     vkCmdSetScissor(CommandBuffer, 0, 1, &Scissor);
 
-    vkCmdDraw(CommandBuffer, 3, 1, 0, 0);
+    VkBuffer VertexBuffers[] = { Vulkan::Renderer::VertexBuffer };
+    VkDeviceSize Offsets[] = { 0 };
+    vkCmdBindVertexBuffers(CommandBuffer, 0, 1, VertexBuffers, Offsets);
+
+    vkCmdDraw(CommandBuffer, static_cast<uint32_t>(Vulkan::Renderer::Vertices.size()), 1, 0, 0);
 
     vkCmdEndRenderPass(CommandBuffer);
 
@@ -1117,6 +1119,7 @@ void Vulkan::Renderer::CreateVertexBuffer()
     VkBufferCreateInfo BufferInfo{};
     BufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
     BufferInfo.size = sizeof(Vulkan::Renderer::Vertices[0]) * Vulkan::Renderer::Vertices.size();
+    BufferInfo.usage = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
     BufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 
     if (vkCreateBuffer(Vulkan::Renderer::Device, &BufferInfo, nullptr, &Vulkan::Renderer::VertexBuffer) != VK_SUCCESS)
@@ -1142,9 +1145,14 @@ void Vulkan::Renderer::CreateVertexBuffer()
     }
     else if (vkAllocateMemory(Vulkan::Renderer::Device, &AllocateInfo, nullptr, &Vulkan::Renderer::VertexBufferMemory) == VK_SUCCESS)
     {
-        vkBindBufferMemory(Vulkan::Renderer::Device, Vulkan::Renderer::VertexBuffer, Vulkan::Renderer::VertexBufferMemory, 0);
         std::cout << "VK > Successfully allocated vertex buffer memory! \n";
+        vkBindBufferMemory(Vulkan::Renderer::Device, Vulkan::Renderer::VertexBuffer, Vulkan::Renderer::VertexBufferMemory, 0);
     }
+
+    void* Data;
+    vkMapMemory(Vulkan::Renderer::Device, Vulkan::Renderer::VertexBufferMemory, 0, BufferInfo.size, 0, &Data);
+    memcpy(Data, Vulkan::Renderer::Vertices.data(), (size_t) BufferInfo.size);
+    vkUnmapMemory(Vulkan::Renderer::Device, Vulkan::Renderer::VertexBufferMemory);
 }
 
 uint32_t Vulkan::Renderer::FindMemoryType(uint32_t TypeFilter, VkMemoryPropertyFlags Properties)
@@ -1156,6 +1164,7 @@ uint32_t Vulkan::Renderer::FindMemoryType(uint32_t TypeFilter, VkMemoryPropertyF
     {
         if (TypeFilter & (1 << i) && (MemoryProperties.memoryTypes[i].propertyFlags & Properties) == Properties)
         {
+            std::cout << "VK > Found suitable memory type! \n";
             return i;
         }
     }

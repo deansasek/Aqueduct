@@ -46,16 +46,16 @@ namespace Vulkan
 				AttributeDescriptions[0].format = VK_FORMAT_R32G32_SFLOAT;
 				AttributeDescriptions[0].offset = offsetof(Vertex, Pos);
 
-				AttributeDescriptions[1].binding = 1;
+				AttributeDescriptions[1].binding = 0;
 				AttributeDescriptions[1].location = 1;
 				AttributeDescriptions[1].format = VK_FORMAT_R32G32B32_SFLOAT;
-				AttributeDescriptions[1].offset = offsetof(Vertex, Color)
+				AttributeDescriptions[1].offset = offsetof(Vertex, Color);
 
 				return AttributeDescriptions;
 			}
 		};
 
-		const std::vector<Vertex> Vertices;
+		extern const std::vector<Vertex> Vertices;
 
 		const std::vector<const char*> ValidationLayers = {
 			"VK_LAYER_KHRONOS_validation"

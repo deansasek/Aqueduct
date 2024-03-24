@@ -5,10 +5,11 @@
 
 #include <vulkan/vulkan.h>
 
-// new sdl2
 #define SDL_MAIN_HANDLED
 #include <SDL.h>
 #include <SDL_vulkan.h>
+
+#include <glm/glm.hpp>
 
 #include <iostream>
 #include <stdexcept>
