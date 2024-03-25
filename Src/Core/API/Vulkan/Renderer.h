@@ -1,8 +1,5 @@
 #pragma once
 
-#ifndef VULKAN_RENDERER_H
-#define VULKAN_RENDERER_H
-
 namespace Vulkan
 {
 	namespace Renderer
@@ -55,6 +52,12 @@ namespace Vulkan
 			}
 		};
 
+		struct UniformBufferObject {
+			alignas(16) glm::mat4 Model;
+			alignas(16) glm::mat4 View;
+			alignas(16) glm::mat4 Proj;
+		};
+
 		extern const std::vector<Vertex> Vertices;
 		extern const std::vector<uint16_t> Indices;
 
@@ -82,6 +85,7 @@ namespace Vulkan
 		extern VkQueue GraphicsQueue;
 		extern VkQueue PresentQueue;
 
+		extern VkDescriptorSetLayout DescriptorSetLayout;
 		extern VkPipelineLayout PipelineLayout;
 		extern VkPipeline GraphicsPipeline;
 
@@ -109,6 +113,13 @@ namespace Vulkan
 		extern VkBuffer IndexBuffer;
 		extern VkDeviceMemory IndexBufferMemory;
 
+		extern std::vector<VkBuffer> UniformBuffers;
+		extern std::vector<VkDeviceMemory> UniformBuffersMemory;
+		extern std::vector<void*> UniformBuffersMapped;
+
+		extern VkDescriptorPool DescriptorPool;
+		extern std::vector<VkDescriptorSet> DescriptorSets;
+
 		extern bool FramebufferResized;
 
 		const uint32_t MaxFramesInFlight = 2;
@@ -128,6 +139,9 @@ namespace Vulkan
 		void CleanUpSwapChain();
 		void CreateImageViews();
 		void CreateFramebuffers();
+		void CreateDescriptorSetLayout();
+		void CreateDescriptorPool();
+		void CreateDescriptorSets();
 		void CreateGraphicsPipeline();
 		void CreateRenderPass();
 		void CreateCommandBuffers();
@@ -139,6 +153,8 @@ namespace Vulkan
 		void DestroyDebugUtilsMessengerEXT(VkInstance Instance, VkDebugUtilsMessengerEXT DebugMessenger, const VkAllocationCallbacks* PAllocator);
 		void CreateVertexBuffer();
 		void CreateIndexBuffer();
+		void CreateUniformBuffers();
+		void UpdateUniformBuffer(uint32_t CurrentImage);
 		void CreateBuffer(VkDeviceSize Size, VkBufferUsageFlags Usage, VkMemoryPropertyFlags Properties, VkBuffer& Buffer, VkDeviceMemory& BufferMemory);
 		void CopyBuffer(VkBuffer SrcBuffer, VkBuffer DstBuffer, VkDeviceSize Size);
 
@@ -167,12 +183,5 @@ namespace Vulkan
 		VkResult CreateDebugUtilsMessengerEXT(VkInstance Instance, const VkDebugUtilsMessengerCreateInfoEXT* PCreateInfo, const VkAllocationCallbacks* PAllocator, VkDebugUtilsMessengerEXT* PDebugMessenger);
 
 		static VKAPI_ATTR VkBool32 VKAPI_CALL DebugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT MessageSeverity, VkDebugUtilsMessageTypeFlagsEXT MessageType, const VkDebugUtilsMessengerCallbackDataEXT* PCallbackData, void* PUserData);
-
-		/*
-			File System Module
-		*/
-		std::vector<char> ReadFile(const std::string& FileName);
 	}
 }
-
-#endif
