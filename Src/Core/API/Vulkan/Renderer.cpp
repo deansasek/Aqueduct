@@ -1348,7 +1348,7 @@ void Vulkan::Renderer::UpdateUniformBuffer(uint32_t CurrentImage)
     float Time = std::chrono::duration<float, std::chrono::seconds::period>(CurrentTime - StartTime).count();
 
     Vulkan::Renderer::UniformBufferObject UBO{};
-    UBO.Model = glm::rotate(glm::mat4(1.0f), Time * glm::radians(0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+    UBO.Model = glm::rotate(glm::mat4(1.0f), Time * glm::radians(0.0f), glm::vec3(0.0f, 0.0f, 5.0f));
     //UBO.View = glm::lookAt(glm::vec3(8.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
     UBO.View = Camera::GetViewMatrix();
     UBO.Proj = glm::perspective(glm::radians(45.0f), Vulkan::Renderer::SwapChainExtent.width / (float)Vulkan::Renderer::SwapChainExtent.height, 0.1f, 10.0f);
