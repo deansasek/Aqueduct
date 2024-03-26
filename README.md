@@ -1,6 +1,6 @@
-![Aqueduct](/Assets/Textures/Placeholder.png "Aqueduct Render")) 
+**Aqueduct**
 
-**Vulkan Tutorial Project**
+![Aqueduct](/Assets/Textures/Placeholder.png "Aqueduct Render")
 
 Vulkan project based upon https://vulkan-tutorial.com/, with minor changes to the guide:
 - Functions & variables changed from lower camel case to pascal case.
