@@ -6,6 +6,11 @@
 
 #include "../../FileSystem/FileSystem.h"
 
+#include "../../Camera.h"
+
+#define STB_IMAGE_IMPLEMENTATION
+#include <stb_image.h>
+
 SDL_Window* Vulkan::Renderer::Window;
 VkInstance Vulkan::Renderer::Instance;
 VkSurfaceKHR Vulkan::Renderer::Surface;
@@ -1179,6 +1184,36 @@ void Vulkan::Renderer::CreateCommandPool()
     }
 }
 
+void Vulkan::Renderer::CreateTextureImage()
+{
+    int TextureWidth, TextureHeight, TextureChannels;
+
+    stbi_uc* Pixels = stbi_load("Assets/Textures/texture.jpg", &TextureWidth, &TextureHeight, &TextureChannels, STBI_rgb_alpha);
+
+    VkDeviceSize ImageSize = TextureWidth * TextureHeight * 4;
+
+    if (!Pixels)
+    {
+        throw std::runtime_error("VK > Failed to load texture image!");
+    }
+    else
+    {
+        std::cout << "VK > Successfully loaded texture image! \n";
+    }
+
+    VkBuffer StagingBuffer;
+    VkDeviceMemory StagingBufferMemory;
+
+    Vulkan::Renderer::CreateBuffer(ImageSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, StagingBuffer, StagingBufferMemory);
+
+    void* Data;
+    vkMapMemory(Vulkan::Renderer::Device, StagingBufferMemory, 0, ImageSize, 0, &Data);
+    memcpy(Data, Pixels, static_cast<size_t>(ImageSize));
+    vkUnmapMemory(Vulkan::Renderer::Device, StagingBufferMemory);
+
+    stbi_image_free(Pixels);
+}
+
 void Vulkan::Renderer::CreateVertexBuffer()
 {
     VkDeviceSize BufferSize = sizeof(Vulkan::Renderer::Vertices[0]) * Vulkan::Renderer::Vertices.size();
@@ -1313,8 +1348,9 @@ void Vulkan::Renderer::UpdateUniformBuffer(uint32_t CurrentImage)
     float Time = std::chrono::duration<float, std::chrono::seconds::period>(CurrentTime - StartTime).count();
 
     Vulkan::Renderer::UniformBufferObject UBO{};
-    UBO.Model = glm::rotate(glm::mat4(1.0f), Time * glm::radians(45.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-    UBO.View = glm::lookAt(glm::vec3(8.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+    UBO.Model = glm::rotate(glm::mat4(1.0f), Time * glm::radians(0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+    //UBO.View = glm::lookAt(glm::vec3(8.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+    UBO.View = Camera::GetViewMatrix();
     UBO.Proj = glm::perspective(glm::radians(45.0f), Vulkan::Renderer::SwapChainExtent.width / (float)Vulkan::Renderer::SwapChainExtent.height, 0.1f, 10.0f);
     UBO.Proj[1][1] *= -1;
 

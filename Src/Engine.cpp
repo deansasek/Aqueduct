@@ -1,6 +1,9 @@
 #include "Common.h"
 #include "Engine.h"
 
+#include "Core/Input.h"
+#include "Core/Camera.h"
+
 #include "Core/API/Vulkan/Renderer.h"
 
 bool Engine::Running;
@@ -15,17 +18,24 @@ void Engine::Run()
 
     Engine::Running = true;
 
+    SDL_WarpMouseInWindow(Vulkan::Renderer::Window, Vulkan::Renderer::SwapChainExtent.width / 2, Vulkan::Renderer::SwapChainExtent.height / 2);
+    SDL_SetRelativeMouseMode(SDL_TRUE);
+
+    //Input::MouseX = Vulkan::Renderer::SwapChainExtent.width / 2;
+    //Input::MouseY = Vulkan::Renderer::SwapChainExtent.height / 2;
+
     while (Engine::Running)
     {
-        SDL_Event Event;
+        SDL_Event RunEvent;
+        SDL_Event EngineEvent;
 
         /*
             Input Events
         */
 
-        while (SDL_PollEvent(&Event))
+        while (SDL_PollEvent(&RunEvent))
         {
-            if (Event.type == SDL_QUIT)
+            if (RunEvent.type == SDL_QUIT)
             {
                 Engine::Running = false;
                 break;
@@ -39,6 +49,37 @@ void Engine::Run()
         if (Engine::GetAPI() == API::Vulkan)
         {
             Vulkan::Renderer::DrawFrame();
+
+            while (SDL_PollEvent(&EngineEvent))
+            {
+                if (EngineEvent.type == SDL_KEYDOWN)
+                {
+                    if (EngineEvent.key.keysym.sym == SDLK_w)
+                    {
+                        Camera::MoveForward(0.1f);
+                    }
+
+                    if (EngineEvent.key.keysym.sym == SDLK_a)
+                    {
+                        Camera::MoveLeft(0.1f);
+                    }
+
+                    if (EngineEvent.key.keysym.sym == SDLK_s)
+                    {
+                        Camera::MoveBackward(0.1f);
+                    }
+
+                    if (EngineEvent.key.keysym.sym == SDLK_d)
+                    {
+                        Camera::MoveRight(0.1f);
+                    }
+                }
+
+                if (EngineEvent.type == SDL_MOUSEMOTION)
+                {
+                    Input::ParseMouseMotion(EngineEvent.motion.xrel / 3, EngineEvent.motion.yrel / 3);
+                }
+            }
         }
     }
 }
@@ -65,6 +106,8 @@ void Engine::Init(API API)
     {
         Vulkan::Renderer::InitWindow();
         Vulkan::Renderer::Init();
+
+        Camera::CreateCamera();
     }
 
     /*
