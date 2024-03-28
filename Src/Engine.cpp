@@ -54,24 +54,36 @@ void Engine::Run()
             {
                 if (EngineEvent.type == SDL_KEYDOWN)
                 {
+                    //Input::ParseKeyDown(EngineEvent.key.keysym.sym);
+
+                    if (EngineEvent.key.keysym.sym == SDLK_SPACE)
+                    {
+                        Camera::MoveUp(0.05f);
+                    }
+
+                    if (EngineEvent.key.keysym.sym == SDLK_LCTRL)
+                    {
+                        Camera::MoveDown(0.05f);
+                    }
+
                     if (EngineEvent.key.keysym.sym == SDLK_w)
                     {
-                        Camera::MoveForward(0.1f);
+                        Camera::MoveForward(0.05f);
                     }
 
                     if (EngineEvent.key.keysym.sym == SDLK_a)
                     {
-                        Camera::MoveLeft(0.1f);
+                        Camera::MoveLeft(0.05f);
                     }
 
                     if (EngineEvent.key.keysym.sym == SDLK_s)
                     {
-                        Camera::MoveBackward(0.1f);
+                        Camera::MoveBackward(0.05f);
                     }
 
                     if (EngineEvent.key.keysym.sym == SDLK_d)
                     {
-                        Camera::MoveRight(0.1f);
+                        Camera::MoveRight(0.05f);
                     }
                 }
 

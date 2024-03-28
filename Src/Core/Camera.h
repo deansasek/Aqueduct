@@ -18,6 +18,8 @@ namespace Camera
 	void CreateCamera();
 	glm::mat4 GetViewMatrix();
 
+	void MoveUp(float Speed);
+	void MoveDown(float Speed);
 	void MoveForward(float Speed);
 	void MoveBackward(float Speed);
 	void MoveLeft(float Speed);

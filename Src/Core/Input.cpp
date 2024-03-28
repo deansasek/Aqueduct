@@ -3,6 +3,11 @@
 
 #include "Camera.h"
 
+//void Input::ParseKeyDown(SDL_Keycode Event)
+//{
+//	std::cout << Event;
+//}
+
 void Input::ParseMouseMotion(int MouseX, int MouseY)
 {
 	Input::MouseX += MouseX;

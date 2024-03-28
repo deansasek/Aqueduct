@@ -120,6 +120,9 @@ namespace Vulkan
 		extern VkDescriptorPool DescriptorPool;
 		extern std::vector<VkDescriptorSet> DescriptorSets;
 
+		extern VkImage TextureImage;
+		extern VkDeviceMemory TextureImageMemory;
+
 		extern bool FramebufferResized;
 
 		const uint32_t MaxFramesInFlight = 2;
@@ -158,12 +161,19 @@ namespace Vulkan
 		void UpdateUniformBuffer(uint32_t CurrentImage);
 		void CreateBuffer(VkDeviceSize Size, VkBufferUsageFlags Usage, VkMemoryPropertyFlags Properties, VkBuffer& Buffer, VkDeviceMemory& BufferMemory);
 		void CopyBuffer(VkBuffer SrcBuffer, VkBuffer DstBuffer, VkDeviceSize Size);
+		void CopyBufferToImage(VkBuffer Buffer, VkImage Image, uint32_t Width, uint32_t Height);
+
+		void CreateImage(uint32_t Width, uint32_t Height, VkFormat Format, VkImageTiling Tiling, VkImageUsageFlags Usage, VkMemoryPropertyFlags Properties, VkImage& Image, VkDeviceMemory& ImageMemory);
 
 		bool CheckDeviceExtensionSupport(VkPhysicalDevice Device);
 		bool CheckValidationLayerSupport();
 		bool IsDeviceSuitable(VkPhysicalDevice Device);
 
 		int RateDeviceSuitability(VkPhysicalDevice Device);
+
+		void EndSingleTimeCommands(VkCommandBuffer CommandBuffer);
+
+		void TransitionImageLayout(VkImage Image, VkFormat Format, VkImageLayout OldLayout, VkImageLayout NewLayout);
 
 		std::vector<const char*> GetRequiredExtensions();
 
@@ -182,6 +192,8 @@ namespace Vulkan
 		uint32_t FindMemoryType(uint32_t TypeFilter, VkMemoryPropertyFlags Properties);
 
 		VkResult CreateDebugUtilsMessengerEXT(VkInstance Instance, const VkDebugUtilsMessengerCreateInfoEXT* PCreateInfo, const VkAllocationCallbacks* PAllocator, VkDebugUtilsMessengerEXT* PDebugMessenger);
+
+		VkCommandBuffer BeginSingleTimeCommands();
 
 		static VKAPI_ATTR VkBool32 VKAPI_CALL DebugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT MessageSeverity, VkDebugUtilsMessageTypeFlagsEXT MessageType, const VkDebugUtilsMessengerCallbackDataEXT* PCallbackData, void* PUserData);
 	}

@@ -25,6 +25,16 @@ glm::mat4 Camera::GetViewMatrix()
 	return glm::lookAt(Camera::Camera.Eye, Camera::Camera.Eye + Camera::Camera.ViewDirection, Camera::Camera.UpVector);
 }
 
+void Camera::MoveUp(float Speed)
+{
+	Camera::Camera.Eye.y += Speed;
+}
+
+void Camera::MoveDown(float Speed)
+{
+	Camera::Camera.Eye.y -= Speed;
+}
+
 void Camera::MoveForward(float Speed)
 {
 	Camera::Camera.Eye += (Camera::Camera.ViewDirection * Speed);
