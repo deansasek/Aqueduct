@@ -121,6 +121,9 @@ void Vulkan::Renderer::CleanUp()
 {
     Vulkan::Renderer::CleanUpSwapChain();
 
+    vkDestroyImage(Vulkan::Renderer::Device, Vulkan::Renderer::TextureImage, nullptr);
+    vkFreeMemory(Vulkan::Renderer::Device, Vulkan::Renderer::TextureImageMemory, nullptr);
+
     vkDestroyBuffer(Vulkan::Renderer::Device, Vulkan::Renderer::IndexBuffer, nullptr);
     vkFreeMemory(Vulkan::Renderer::Device, Vulkan::Renderer::IndexBufferMemory, nullptr);
 
@@ -1204,7 +1207,7 @@ void Vulkan::Renderer::CreateImage(uint32_t Width, uint32_t Height, VkFormat For
     CreateInfo.usage = Usage;
     CreateInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
     CreateInfo.samples = VK_SAMPLE_COUNT_1_BIT;
-    CreateInfo.flags = 0;
+    //CreateInfo.flags = 0;
 
     if (vkCreateImage(Vulkan::Renderer::Device, &CreateInfo, nullptr, &Image) != VK_SUCCESS)
     {
@@ -1223,13 +1226,13 @@ void Vulkan::Renderer::CreateImage(uint32_t Width, uint32_t Height, VkFormat For
     AllocateInfo.allocationSize = MemoryRequirements.size;
     AllocateInfo.memoryTypeIndex = Vulkan::Renderer::FindMemoryType(MemoryRequirements.memoryTypeBits, Properties);
 
-    if (vkAllocateMemory(Vulkan::Renderer::Device, &AllocateInfo, nullptr, &Vulkan::Renderer::TextureImageMemory) != VK_SUCCESS)
+    if (vkAllocateMemory(Vulkan::Renderer::Device, &AllocateInfo, nullptr, &ImageMemory) != VK_SUCCESS)
     {
         throw std::runtime_error("VK > Failed to allocate texture image memory!");
     }
-    else if (vkAllocateMemory(Vulkan::Renderer::Device, &AllocateInfo, nullptr, &Vulkan::Renderer::TextureImageMemory) == VK_SUCCESS)
+    else
     {
-        std::cout << "VK > Successfully allocated texture image memory!" << std::endl;
+        std::cout << "Failed" << std::endl;
     }
 
     vkBindImageMemory(Vulkan::Renderer::Device, Image, ImageMemory, 0);
@@ -1304,7 +1307,6 @@ void Vulkan::Renderer::CreateTextureImage()
 
     VkBuffer StagingBuffer;
     VkDeviceMemory StagingBufferMemory;
-
     Vulkan::Renderer::CreateBuffer(ImageSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, StagingBuffer, StagingBufferMemory);
 
     void* Data;
@@ -1317,9 +1319,7 @@ void Vulkan::Renderer::CreateTextureImage()
     Vulkan::Renderer::CreateImage(TextureWidth, TextureHeight, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, Vulkan::Renderer::TextureImage, Vulkan::Renderer::TextureImageMemory);
 
     Vulkan::Renderer::TransitionImageLayout(Vulkan::Renderer::TextureImage, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
-
     Vulkan::Renderer::CopyBufferToImage(StagingBuffer, Vulkan::Renderer::TextureImage, static_cast<uint32_t>(TextureWidth), static_cast<uint32_t>(TextureHeight));
-
     Vulkan::Renderer::TransitionImageLayout(Vulkan::Renderer::TextureImage, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 
     vkDestroyBuffer(Vulkan::Renderer::Device, StagingBuffer, nullptr);
