@@ -1,6 +1,6 @@
 #pragma once
 
-#ifndef CAMERA_HH
+#ifndef CAMERA_H
 #define CAMERA_H
 
 namespace Camera

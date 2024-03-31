@@ -22,8 +22,9 @@ namespace Vulkan
 		};
 
 		struct Vertex {
-			glm::vec2 Pos;
+			glm::vec3 Pos;
 			glm::vec3 Color;
+			glm::vec2 TexCoord;
 
 			static VkVertexInputBindingDescription GetBindingDescription()
 			{
@@ -35,18 +36,36 @@ namespace Vulkan
 				return BindingDescription;
 			}
 
-			static std::array<VkVertexInputAttributeDescription, 2> GetAttributeDescriptions()
+			static std::array<VkVertexInputAttributeDescription, 3> GetAttributeDescriptions()
 			{
-				std::array<VkVertexInputAttributeDescription, 2> AttributeDescriptions{};
+				std::array<VkVertexInputAttributeDescription, 3> AttributeDescriptions{};
+
+				/*
+					glm::vec3 Pos;
+				*/
+
 				AttributeDescriptions[0].binding = 0;
 				AttributeDescriptions[0].location = 0;
-				AttributeDescriptions[0].format = VK_FORMAT_R32G32_SFLOAT;
+				AttributeDescriptions[0].format = VK_FORMAT_R32G32B32_SFLOAT;
 				AttributeDescriptions[0].offset = offsetof(Vertex, Pos);
+
+				/*
+					glm::vec2 Color;
+				*/
 
 				AttributeDescriptions[1].binding = 0;
 				AttributeDescriptions[1].location = 1;
 				AttributeDescriptions[1].format = VK_FORMAT_R32G32B32_SFLOAT;
 				AttributeDescriptions[1].offset = offsetof(Vertex, Color);
+
+				/*
+					glm::vec2 TexCoord;
+				*/
+
+				AttributeDescriptions[2].binding = 0;
+				AttributeDescriptions[2].location = 2;
+				AttributeDescriptions[2].format = VK_FORMAT_R32G32_SFLOAT;
+				AttributeDescriptions[2].offset = offsetof(Vertex, TexCoord);
 
 				return AttributeDescriptions;
 			}
@@ -58,8 +77,8 @@ namespace Vulkan
 			alignas(16) glm::mat4 Proj;
 		};
 
-		extern const std::vector<Vertex> Vertices;
-		extern const std::vector<uint16_t> Indices;
+		extern std::vector<Vertex> Vertices;
+		extern std::vector<uint32_t> Indices;
 
 		const std::vector<const char*> ValidationLayers = {
 			"VK_LAYER_KHRONOS_validation"
@@ -79,6 +98,7 @@ namespace Vulkan
 		extern VkInstance Instance;
 		extern VkSurfaceKHR Surface;
 
+		extern std::multimap<int, VkPhysicalDevice> Candidates;
 		extern VkPhysicalDevice PhysicalDevice;
 		extern VkDevice Device;
 
@@ -122,6 +142,15 @@ namespace Vulkan
 
 		extern VkImage TextureImage;
 		extern VkDeviceMemory TextureImageMemory;
+		extern VkImageView TextureImageView;
+		extern VkSampler TextureSampler;
+
+		extern VkImage DepthImage;
+		extern VkDeviceMemory DepthImageMemory;
+		extern VkImageView DepthImageView;
+
+		extern std::string ModelPath;
+		extern std::string TexturePath;
 
 		extern bool FramebufferResized;
 
@@ -155,6 +184,8 @@ namespace Vulkan
 		void PopulateDebugMessengerCreateInfo(VkDebugUtilsMessengerCreateInfoEXT& CreateInfo);
 		void DestroyDebugUtilsMessengerEXT(VkInstance Instance, VkDebugUtilsMessengerEXT DebugMessenger, const VkAllocationCallbacks* PAllocator);
 		void CreateTextureImage();
+		void CreateTextureImageView();
+		void CreateTextureSampler();
 		void CreateVertexBuffer();
 		void CreateIndexBuffer();
 		void CreateUniformBuffers();
@@ -162,18 +193,19 @@ namespace Vulkan
 		void CreateBuffer(VkDeviceSize Size, VkBufferUsageFlags Usage, VkMemoryPropertyFlags Properties, VkBuffer& Buffer, VkDeviceMemory& BufferMemory);
 		void CopyBuffer(VkBuffer SrcBuffer, VkBuffer DstBuffer, VkDeviceSize Size);
 		void CopyBufferToImage(VkBuffer Buffer, VkImage Image, uint32_t Width, uint32_t Height);
-
+		void EndSingleTimeCommands(VkCommandBuffer CommandBuffer);
+		void TransitionImageLayout(VkImage Image, VkFormat Format, VkImageLayout OldLayout, VkImageLayout NewLayout);
+		void CreateDepthResources();
 		void CreateImage(uint32_t Width, uint32_t Height, VkFormat Format, VkImageTiling Tiling, VkImageUsageFlags Usage, VkMemoryPropertyFlags Properties, VkImage& Image, VkDeviceMemory& ImageMemory);
+		void LoadModel();
 
 		bool CheckDeviceExtensionSupport(VkPhysicalDevice Device);
 		bool CheckValidationLayerSupport();
 		bool IsDeviceSuitable(VkPhysicalDevice Device);
+		bool HasStencilComponent(VkFormat Format);
+
 
 		int RateDeviceSuitability(VkPhysicalDevice Device);
-
-		void EndSingleTimeCommands(VkCommandBuffer CommandBuffer);
-
-		void TransitionImageLayout(VkImage Image, VkFormat Format, VkImageLayout OldLayout, VkImageLayout NewLayout);
 
 		std::vector<const char*> GetRequiredExtensions();
 
@@ -193,7 +225,12 @@ namespace Vulkan
 
 		VkResult CreateDebugUtilsMessengerEXT(VkInstance Instance, const VkDebugUtilsMessengerCreateInfoEXT* PCreateInfo, const VkAllocationCallbacks* PAllocator, VkDebugUtilsMessengerEXT* PDebugMessenger);
 
+		VkImageView CreateImageView(VkImage Image, VkFormat Format, VkImageAspectFlags AspectFlags);
+
 		VkCommandBuffer BeginSingleTimeCommands();
+
+		VkFormat FindDepthFormat();
+		VkFormat FindSupportedFormats(const std::vector<VkFormat>& Candidates, VkImageTiling Tiling, VkFormatFeatureFlags Features);
 
 		static VKAPI_ATTR VkBool32 VKAPI_CALL DebugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT MessageSeverity, VkDebugUtilsMessageTypeFlagsEXT MessageType, const VkDebugUtilsMessengerCallbackDataEXT* PCallbackData, void* PUserData);
 	}
