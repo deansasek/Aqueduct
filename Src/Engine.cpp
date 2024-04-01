@@ -1,5 +1,6 @@
 #include "Common.h"
 #include "Engine.h"
+#include "Core/FileSystem/FileSystem.h"
 
 #include "Core/Input.h"
 #include "Core/Camera.h"
@@ -15,6 +16,7 @@ SDL_bool WindowFullscreen;
 void Engine::Run()
 {
     Engine::Init(API::Vulkan);
+    FileSystem::LoadTextures();
 
     Engine::Running = true;
 
@@ -58,32 +60,32 @@ void Engine::Run()
 
                     if (EngineEvent.key.keysym.sym == SDLK_SPACE)
                     {
-                        Camera::MoveUp(0.05f);
+                        Camera::MoveUp(0.5f);
                     }
 
                     if (EngineEvent.key.keysym.sym == SDLK_LCTRL)
                     {
-                        Camera::MoveDown(0.05f);
+                        Camera::MoveDown(0.5f);
                     }
 
                     if (EngineEvent.key.keysym.sym == SDLK_w)
                     {
-                        Camera::MoveForward(0.05f);
+                        Camera::MoveForward(0.5f);
                     }
 
                     if (EngineEvent.key.keysym.sym == SDLK_a)
                     {
-                        Camera::MoveLeft(0.05f);
+                        Camera::MoveLeft(0.5f);
                     }
 
                     if (EngineEvent.key.keysym.sym == SDLK_s)
                     {
-                        Camera::MoveBackward(0.05f);
+                        Camera::MoveBackward(0.5f);
                     }
 
                     if (EngineEvent.key.keysym.sym == SDLK_d)
                     {
-                        Camera::MoveRight(0.05f);
+                        Camera::MoveRight(0.5f);
                     }
                 }
 

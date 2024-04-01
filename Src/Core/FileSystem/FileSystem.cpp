@@ -2,6 +2,11 @@
 
 #include "FileSystem.h"
 
+#include <filesystem>
+#include <regex>
+
+namespace fs = std::filesystem;
+
 std::vector<char> FileSystem::ReadFile(const std::string& FileName)
 {
     std::ifstream File(FileName, std::ios::ate | std::ios::binary);
@@ -24,4 +29,16 @@ std::vector<char> FileSystem::ReadFile(const std::string& FileName)
     File.close();
 
     return Buffer;
+}
+
+void FileSystem::LoadTextures()
+{
+    int Count = 0;
+
+    for (auto& p : std::filesystem::recursive_directory_iterator("Assets/Textures"))
+    {
+        Count += 1;
+    }
+
+    std::cout << "Found " << Count << " files" << std::endl;
 }

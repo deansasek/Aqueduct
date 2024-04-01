@@ -14,6 +14,8 @@
 #define TINYOBJLOADER_IMPLEMENTATION
 #include <tiny_obj_loader.h>
 
+#include <unordered_map>
+
 SDL_Window* Vulkan::Renderer::Window;
 VkInstance Vulkan::Renderer::Instance;
 VkSurfaceKHR Vulkan::Renderer::Surface;
@@ -105,8 +107,22 @@ const std::vector<uint16_t> Vulkan::Renderer::Indices = {
     Models
 */
 
-std::string Vulkan::Renderer::ModelPath = "Assets/Models/model.obj";
+std::string Vulkan::Renderer::ModelPath = "Assets/Models/de_dust2.obj";
 std::string Vulkan::Renderer::TexturePath = "Assets/Textures/model.png";
+
+namespace std
+{
+    template<> struct hash<Vulkan::Renderer::Vertex>
+    {
+        //size_t Vulkan::Renderer::Vertex.Operator()(Vulkan::Renderer::Vertex const& Vertex) const
+        size_t operator()(Vulkan::Renderer::Vertex const& Vertex) const
+        {
+            return ((hash<glm::vec3>()(Vertex.Pos) ^
+                   (hash<glm::vec3>()(Vertex.Color) << 1)) >> 1) ^
+                   (hash<glm::vec2>()(Vertex.TexCoord) << 1);
+        }
+    };
+}
 
 void Vulkan::Renderer::Init()
 {
@@ -1308,6 +1324,8 @@ void Vulkan::Renderer::LoadModel()
         std::cout << "VK > Successfully loaded model!" << std::endl;
     }
 
+    std::unordered_map<Vulkan::Renderer::Vertex, uint32_t> UniqueVertices{};
+
     for (const auto& Shape : Shapes)
     {
         for (const auto& Index : Shape.mesh.indices)
@@ -1327,8 +1345,13 @@ void Vulkan::Renderer::LoadModel()
 
             Vertex.Color = { 1.0f, 1.0f, 1.0f };
 
-            Vulkan::Renderer::Vertices.push_back(Vertex);
-            Vulkan::Renderer::Indices.push_back(Vulkan::Renderer::Indices.size());
+            if (UniqueVertices.count(Vertex) == 0)
+            {
+                UniqueVertices[Vertex] = static_cast<uint32_t>(Vulkan::Renderer::Vertices.size());
+                Vulkan::Renderer::Vertices.push_back(Vertex);
+
+            }
+            Vulkan::Renderer::Indices.push_back(UniqueVertices[Vertex]);
         }
     }
 }

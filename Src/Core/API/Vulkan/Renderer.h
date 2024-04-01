@@ -69,6 +69,11 @@ namespace Vulkan
 
 				return AttributeDescriptions;
 			}
+
+			bool operator==(const Vertex& Other) const
+			{
+				return Pos == Other.Pos && Color == Other.Color && TexCoord == Other.TexCoord;
+			}
 		};
 
 		struct UniformBufferObject {
