@@ -1,10 +1,13 @@
 #pragma once
 
-namespace Input
+namespace Engine
 {
-	static int MouseX;
-	static int MouseY;
+	namespace Input
+	{
+		static int MouseX;
+		static int MouseY;
 
-	//void ParseKeyDown(SDL_Keycode Event);
-	void ParseMouseMotion(int MouseX, int MouseY);
+		void ParseEvent();
+		void ParseMouseMotion(int MouseX, int MouseY);
+	}
 }

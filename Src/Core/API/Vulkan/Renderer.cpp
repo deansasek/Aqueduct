@@ -1326,6 +1326,10 @@ void Vulkan::Renderer::LoadModel()
 
     std::unordered_map<Vulkan::Renderer::Vertex, uint32_t> UniqueVertices{};
 
+    for (const auto& Material : Materials) {
+        std::cout << Material.diffuse_texname << std::endl;
+    }
+
     for (const auto& Shape : Shapes)
     {
         for (const auto& Index : Shape.mesh.indices)
@@ -1732,7 +1736,7 @@ void Vulkan::Renderer::UpdateUniformBuffer(uint32_t CurrentImage)
     Vulkan::Renderer::UniformBufferObject UBO{};
     UBO.Model = glm::rotate(glm::mat4(1.0f), glm::radians(0.0f), glm::vec3(1.0f, 0.0f, 0.0f));
     //UBO.View = glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-    UBO.View = Camera::GetViewMatrix();
+    UBO.View = Engine::Camera::GetViewMatrix();
     UBO.Proj = glm::perspective(glm::radians(45.0f), Vulkan::Renderer::SwapChainExtent.width / (float)Vulkan::Renderer::SwapChainExtent.height, 0.1f, 256.0f);
     UBO.Proj[1][1] *= -1;
 
