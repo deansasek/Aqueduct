@@ -21,10 +21,16 @@ namespace Vulkan
 			std::vector<VkPresentModeKHR> PresentModes;
 		};
 
+		struct {
+			VkPipeline Normal{ VK_NULL_HANDLE };
+			VkPipeline WireFrame{ VK_NULL_HANDLE };
+		} Pipelines;
+
 		struct Vertex {
 			glm::vec3 Pos;
 			glm::vec3 Color;
-			glm::vec2 TexCoord;
+			glm::vec3 Normal;
+			glm::vec2 UV;
 
 			static VkVertexInputBindingDescription GetBindingDescription()
 			{
@@ -36,50 +42,48 @@ namespace Vulkan
 				return BindingDescription;
 			}
 
-			static std::array<VkVertexInputAttributeDescription, 3> GetAttributeDescriptions()
+			static std::vector<VkVertexInputAttributeDescription> GetAttributeDescriptions()
 			{
-				std::array<VkVertexInputAttributeDescription, 3> AttributeDescriptions{};
+				std::vector<VkVertexInputAttributeDescription> AttributeDescriptions{};
+
+				AttributeDescriptions.push_back({ 0, 0, VK_FORMAT_R32G32B32_SFLOAT, offsetof(Vertex, Pos) });
+				AttributeDescriptions.push_back({ 1, 0, VK_FORMAT_R32G32B32_SFLOAT, offsetof(Vertex, Color) });
+				AttributeDescriptions.push_back({ 2, 0, VK_FORMAT_R32G32B32_SFLOAT, offsetof(Vertex, Normal) });
+				AttributeDescriptions.push_back({ 3, 0, VK_FORMAT_R32G32_SFLOAT, offsetof(Vertex, UV) });
 
 				/*
-					glm::vec3 Pos;
-				*/
-
 				AttributeDescriptions[0].binding = 0;
 				AttributeDescriptions[0].location = 0;
 				AttributeDescriptions[0].format = VK_FORMAT_R32G32B32_SFLOAT;
 				AttributeDescriptions[0].offset = offsetof(Vertex, Pos);
-
-				/*
-					glm::vec2 Color;
-				*/
 
 				AttributeDescriptions[1].binding = 0;
 				AttributeDescriptions[1].location = 1;
 				AttributeDescriptions[1].format = VK_FORMAT_R32G32B32_SFLOAT;
 				AttributeDescriptions[1].offset = offsetof(Vertex, Color);
 
-				/*
-					glm::vec2 TexCoord;
-				*/
-
 				AttributeDescriptions[2].binding = 0;
 				AttributeDescriptions[2].location = 2;
 				AttributeDescriptions[2].format = VK_FORMAT_R32G32_SFLOAT;
-				AttributeDescriptions[2].offset = offsetof(Vertex, TexCoord);
+				AttributeDescriptions[2].offset = offsetof(Vertex, UV);
+				*/
 
 				return AttributeDescriptions;
 			}
 
 			bool operator==(const Vertex& Other) const
 			{
-				return Pos == Other.Pos && Color == Other.Color && TexCoord == Other.TexCoord;
+				return Pos == Other.Pos && Color == Other.Color && Normal == Other.Normal && UV == Other.UV;
 			}
 		};
 
 		struct UniformBufferObject {
+			//alignas(16) glm::mat4 Model;
 			alignas(16) glm::mat4 Model;
 			alignas(16) glm::mat4 View;
 			alignas(16) glm::mat4 Proj;
+
+			alignas(16) glm::mat4 Transform;
 		};
 
 		extern std::vector<Vertex> Vertices;
@@ -113,6 +117,9 @@ namespace Vulkan
 		extern VkDescriptorSetLayout DescriptorSetLayout;
 		extern VkPipelineLayout PipelineLayout;
 		extern VkPipeline GraphicsPipeline;
+		extern VkPipeline WireframePipeline;
+
+		extern std::vector<VkShaderModule> ShaderModules;
 
 		extern VkSwapchainKHR SwapChain;
 		extern std::vector<VkImage> SwapChainImages;
@@ -154,9 +161,6 @@ namespace Vulkan
 		extern VkDeviceMemory DepthImageMemory;
 		extern VkImageView DepthImageView;
 
-		extern std::string ModelPath;
-		extern std::string TexturePath;
-
 		extern bool FramebufferResized;
 
 		const uint32_t MaxFramesInFlight = 2;
@@ -179,7 +183,7 @@ namespace Vulkan
 		void CreateDescriptorSetLayout();
 		void CreateDescriptorPool();
 		void CreateDescriptorSets();
-		void CreateGraphicsPipeline();
+		void CreatePipelines();
 		void CreateRenderPass();
 		void CreateCommandBuffers();
 		void CreateCommandPool();
@@ -202,15 +206,15 @@ namespace Vulkan
 		void TransitionImageLayout(VkImage Image, VkFormat Format, VkImageLayout OldLayout, VkImageLayout NewLayout);
 		void CreateDepthResources();
 		void CreateImage(uint32_t Width, uint32_t Height, VkFormat Format, VkImageTiling Tiling, VkImageUsageFlags Usage, VkMemoryPropertyFlags Properties, VkImage& Image, VkDeviceMemory& ImageMemory);
-		void LoadModel();
 
 		bool CheckDeviceExtensionSupport(VkPhysicalDevice Device);
 		bool CheckValidationLayerSupport();
 		bool IsDeviceSuitable(VkPhysicalDevice Device);
 		bool HasStencilComponent(VkFormat Format);
 
-
 		int RateDeviceSuitability(VkPhysicalDevice Device);
+
+		VkPipelineShaderStageCreateInfo LoadShader(std::string FileName, VkShaderStageFlagBits Stage);
 
 		std::vector<const char*> GetRequiredExtensions();
 

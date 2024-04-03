@@ -16,6 +16,7 @@ SDL_bool WindowFullscreen;
 void Engine::Run()
 {
     Engine::Init(API::Vulkan);
+
     FileSystem::LoadTextures();
 
     Engine::Running = true;
