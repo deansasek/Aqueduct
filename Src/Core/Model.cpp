@@ -23,6 +23,35 @@ namespace std
     };
 }
 
+void Engine::Model::Load(std::string FilePath)
+{
+    std::cout << "LOADING MODEL!" << std::endl;
+
+    Engine::Model::LoadModel(FilePath);
+
+    Engine::Model::CreateVertexBuffer();
+    Engine::Model::CreateIndexBuffer();
+}
+
+void Engine::Model::Render(VkCommandBuffer CommandBuffer)
+{
+    VkBuffer VertexBuffers[] = { Engine::Model::VertexBuffer };
+    VkDeviceSize Offsets[] = { 0 };
+    vkCmdBindVertexBuffers(CommandBuffer, 0, 1, VertexBuffers, Offsets);
+    vkCmdBindIndexBuffer(CommandBuffer, Engine::Model::IndexBuffer, 0, VK_INDEX_TYPE_UINT32);
+
+    vkCmdDrawIndexed(CommandBuffer, static_cast<uint32_t>(Engine::Model::Indices.size()), 1, 0, 0, 0);
+}
+
+void Engine::Model::Destroy()
+{
+    vkDestroyBuffer(Vulkan::Renderer::Device, VertexBuffer, nullptr);
+    vkFreeMemory(Vulkan::Renderer::Device, VertexBufferMemory, nullptr);
+
+    vkDestroyBuffer(Vulkan::Renderer::Device, IndexBuffer, nullptr);
+    vkFreeMemory(Vulkan::Renderer::Device, IndexBufferMemory, nullptr);
+}
+
 void Engine::Model::LoadModel(std::string ModelPath)
 {
     tinyobj::attrib_t Attrib;
@@ -93,11 +122,61 @@ void Engine::Model::LoadModel(std::string ModelPath)
 
             if (UniqueVertices.count(Vertex) == 0)
             {
-                UniqueVertices[Vertex] = static_cast<uint32_t>(Vulkan::Renderer::Vertices.size());
-                Vulkan::Renderer::Vertices.push_back(Vertex);
+                UniqueVertices[Vertex] = static_cast<uint32_t>(Engine::Model::Vertices.size());
+                Engine::Model::Vertices.push_back(Vertex);
 
             }
-            Vulkan::Renderer::Indices.push_back(UniqueVertices[Vertex]);
+            Engine::Model::Indices.push_back(UniqueVertices[Vertex]);
         }
     }
+
+    std::cout << "VERTICES COUNT: " << Engine::Model::Vertices.size() << std::endl;
+    std::cout << "INDICES COUNT: " << Engine::Model::Indices.size() << std::endl;
+}
+
+void Engine::Model::CreateVertexBuffer()
+{
+    VkDeviceSize BufferSize = sizeof(Engine::Model::Vertices[0]) * Engine::Model::Vertices.size();
+
+    std::cout << "VERTEX BUFFER SIZE: " << BufferSize << std::endl;
+    std::cout << "VERTICES SIZE 2: " << Engine::Model::Vertices.size() << std::endl;
+
+    VkBuffer StagingBuffer;
+    VkDeviceMemory StagingBufferMemory;
+
+    Vulkan::Renderer::CreateBuffer(BufferSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, StagingBuffer, StagingBufferMemory);
+
+    void* Data;
+    vkMapMemory(Vulkan::Renderer::Device, StagingBufferMemory, 0, BufferSize, 0, &Data);
+    memcpy(Data, Engine::Model::Vertices.data(), (size_t)BufferSize);
+    vkUnmapMemory(Vulkan::Renderer::Device, StagingBufferMemory);
+
+    Vulkan::Renderer::CreateBuffer(BufferSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, Engine::Model::VertexBuffer, Engine::Model::VertexBufferMemory);
+
+    Vulkan::Renderer::CopyBuffer(StagingBuffer, Engine::Model::VertexBuffer, BufferSize);
+
+    vkDestroyBuffer(Vulkan::Renderer::Device, StagingBuffer, nullptr);
+    vkFreeMemory(Vulkan::Renderer::Device, StagingBufferMemory, nullptr);
+}
+
+void Engine::Model::CreateIndexBuffer()
+{
+    VkDeviceSize BufferSize = sizeof(Engine::Model::Indices[0]) * Engine::Model::Indices.size();
+
+    VkBuffer StagingBuffer;
+    VkDeviceMemory StagingBufferMemory;
+
+    Vulkan::Renderer::CreateBuffer(BufferSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, StagingBuffer, StagingBufferMemory);
+
+    void* Data;
+    vkMapMemory(Vulkan::Renderer::Device, StagingBufferMemory, 0, BufferSize, 0, &Data);
+    memcpy(Data, Engine::Model::Indices.data(), (size_t)BufferSize);
+    vkUnmapMemory(Vulkan::Renderer::Device, StagingBufferMemory);
+
+    Vulkan::Renderer::CreateBuffer(BufferSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, Engine::Model::IndexBuffer, Engine::Model::IndexBufferMemory);
+
+    Vulkan::Renderer::CopyBuffer(StagingBuffer, Engine::Model::IndexBuffer, BufferSize);
+
+    vkDestroyBuffer(Vulkan::Renderer::Device, StagingBuffer, nullptr);
+    vkFreeMemory(Vulkan::Renderer::Device, StagingBufferMemory, nullptr);
 }

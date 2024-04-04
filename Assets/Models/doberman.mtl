@@ -1,0 +1,54 @@
+# Blender 3.3.0 MTL File: 'None'
+# www.blender.org
+
+newmtl DobermanEye
+Ns 323.503021
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+map_Kd C:/Users/Dean/Desktop/4k/DobermanEye.png
+map_Bump -bm 1.200000 C:/Users/Dean/Desktop/4k/DobermanEyeN.png
+
+newmtl DobermanFBody
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+map_Kd C:/Users/Dean/Desktop/4k/Untitled.png
+map_Ns C:/Users/Dean/Desktop/4k/Raf.png
+map_Bump -bm 1.000000 C:/Users/Dean/Desktop/4k/Norm.png
+
+newmtl DobermanFurM
+Ns 360.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.068375 0.093550
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+
+newmtl EyelashesMaterial
+Ns 360.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.000000 0.000000 0.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+
+newmtl Material.013
+Ns 250.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.000000 0.000582
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2

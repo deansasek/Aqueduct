@@ -5,12 +5,26 @@
 
 namespace Engine
 {
-	namespace Model
+	class Model
 	{
-		extern std::string TexturePath;
+	public:
+		std::vector<Vulkan::Renderer::Vertex> Vertices;
+		std::vector<uint32_t> Indices;
+		VkBuffer VertexBuffer;
+		VkDeviceMemory VertexBufferMemory;
+		VkBuffer IndexBuffer;
+		VkDeviceMemory IndexBufferMemory;
 
-		void LoadModel(std::string ModelPath);
-	}
+		static std::string TexturePath;
+
+		void Load(std::string FilePath);
+		void Render(VkCommandBuffer CommandBuffer);
+		void Destroy();
+	private:
+		void LoadModel(std::string FilePath);
+		void CreateVertexBuffer();
+		void CreateIndexBuffer();
+	};
 }
 
 #endif

@@ -86,8 +86,8 @@ namespace Vulkan
 			alignas(16) glm::mat4 Transform;
 		};
 
-		extern std::vector<Vertex> Vertices;
-		extern std::vector<uint32_t> Indices;
+		//extern std::vector<Vertex> Vertices;
+		//extern std::vector<uint32_t> Indices;
 
 		const std::vector<const char*> ValidationLayers = {
 			"VK_LAYER_KHRONOS_validation"
@@ -139,11 +139,11 @@ namespace Vulkan
 
 		extern VkDebugUtilsMessengerEXT DebugMessenger;
 
-		extern VkBuffer VertexBuffer;
-		extern VkDeviceMemory VertexBufferMemory;
+		//extern VkBuffer VertexBuffer;
+		//extern VkDeviceMemory VertexBufferMemory;
 
-		extern VkBuffer IndexBuffer;
-		extern VkDeviceMemory IndexBufferMemory;
+		//extern VkBuffer IndexBuffer;
+		//extern VkDeviceMemory IndexBufferMemory;
 
 		extern std::vector<VkBuffer> UniformBuffers;
 		extern std::vector<VkDeviceMemory> UniformBuffersMemory;

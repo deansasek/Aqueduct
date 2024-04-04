@@ -49,11 +49,11 @@ std::vector<VkFence> Vulkan::Renderer::InFlightFences;
 
 VkDebugUtilsMessengerEXT Vulkan::Renderer::DebugMessenger;
 
-VkBuffer Vulkan::Renderer::VertexBuffer;
-VkDeviceMemory Vulkan::Renderer::VertexBufferMemory;
+//VkBuffer Vulkan::Renderer::VertexBuffer;
+//VkDeviceMemory Vulkan::Renderer::VertexBufferMemory;
 
-VkBuffer Vulkan::Renderer::IndexBuffer;
-VkDeviceMemory Vulkan::Renderer::IndexBufferMemory;
+//VkBuffer Vulkan::Renderer::IndexBuffer;
+//VkDeviceMemory Vulkan::Renderer::IndexBufferMemory;
 
 std::vector<VkBuffer> Vulkan::Renderer::UniformBuffers;
 std::vector<VkDeviceMemory> Vulkan::Renderer::UniformBuffersMemory;
@@ -71,8 +71,8 @@ VkImage Vulkan::Renderer::DepthImage;
 VkDeviceMemory Vulkan::Renderer::DepthImageMemory;
 VkImageView Vulkan::Renderer::DepthImageView;
 
-std::vector<Vulkan::Renderer::Vertex> Vulkan::Renderer::Vertices;
-std::vector<uint32_t> Vulkan::Renderer::Indices;
+//std::vector<Vulkan::Renderer::Vertex> Vulkan::Renderer::Vertices;
+//std::vector<uint32_t> Vulkan::Renderer::Indices;
 
 bool Vulkan::Renderer::FramebufferResized = false;
 
@@ -97,8 +97,6 @@ void Vulkan::Renderer::Init()
     Vulkan::Renderer::CreateTextureImageView();
     Vulkan::Renderer::CreateTextureSampler();
     Engine::GameObject::CreateGameObjects();
-    Vulkan::Renderer::CreateVertexBuffer();
-    Vulkan::Renderer::CreateIndexBuffer();
     Vulkan::Renderer::CreateUniformBuffers();
     Vulkan::Renderer::CreateDescriptorPool();
     Vulkan::Renderer::CreateDescriptorSets();
@@ -135,11 +133,11 @@ void Vulkan::Renderer::CleanUp()
     vkDestroyImage(Vulkan::Renderer::Device, Vulkan::Renderer::TextureImage, nullptr);
     vkFreeMemory(Vulkan::Renderer::Device, Vulkan::Renderer::TextureImageMemory, nullptr);
 
-    vkDestroyBuffer(Vulkan::Renderer::Device, Vulkan::Renderer::IndexBuffer, nullptr);
-    vkFreeMemory(Vulkan::Renderer::Device, Vulkan::Renderer::IndexBufferMemory, nullptr);
+    //vkDestroyBuffer(Vulkan::Renderer::Device, Vulkan::Renderer::IndexBuffer, nullptr);
+    //vkFreeMemory(Vulkan::Renderer::Device, Vulkan::Renderer::IndexBufferMemory, nullptr);
 
-    vkDestroyBuffer(Vulkan::Renderer::Device, Vulkan::Renderer::VertexBuffer, nullptr);
-    vkFreeMemory(Vulkan::Renderer::Device, Vulkan::Renderer::VertexBufferMemory, nullptr);
+    //vkDestroyBuffer(Vulkan::Renderer::Device, Vulkan::Renderer::VertexBuffer, nullptr);
+    //vkFreeMemory(Vulkan::Renderer::Device, Vulkan::Renderer::VertexBufferMemory, nullptr);
 
     for (size_t i = 0; i < Vulkan::Renderer::MaxFramesInFlight; i++)
     {
@@ -1208,16 +1206,18 @@ void Vulkan::Renderer::RecordCommandBuffer(VkCommandBuffer CommandBuffer, uint32
     Scissor.extent = Vulkan::Renderer::SwapChainExtent;
     vkCmdSetScissor(CommandBuffer, 0, 1, &Scissor);
 
-    VkBuffer VertexBuffers[] = { Vulkan::Renderer::VertexBuffer };
-    VkDeviceSize Offsets[] = { 0 };
-    vkCmdBindVertexBuffers(CommandBuffer, 0, 1, VertexBuffers, Offsets);
-    vkCmdBindIndexBuffer(CommandBuffer, Vulkan::Renderer::IndexBuffer, 0, VK_INDEX_TYPE_UINT32);
-
     vkCmdBindPipeline(CommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, Vulkan::Renderer::Pipelines.Normal);
-    vkCmdDrawIndexed(CommandBuffer, static_cast<uint32_t>(Vulkan::Renderer::Indices.size()), 1, 0, 0, 0);
 
-    vkCmdBindPipeline(CommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, Vulkan::Renderer::Pipelines.WireFrame);
-    vkCmdDrawIndexed(CommandBuffer, static_cast<uint32_t>(Vulkan::Renderer::Indices.size()), 1, 0, 0, 0);
+    /*
+        Model magic
+    */
+
+    /*
+        This can probably be done better
+    */
+
+
+    Engine::GameObject::RenderGameObjects(CommandBuffer);
 
     vkCmdEndRenderPass(CommandBuffer);
 
@@ -1517,50 +1517,6 @@ VkImageView Vulkan::Renderer::CreateImageView(VkImage Image, VkFormat Format, Vk
     //}
 
     return ImageView;
-}
-
-void Vulkan::Renderer::CreateVertexBuffer()
-{
-    VkDeviceSize BufferSize = sizeof(Vulkan::Renderer::Vertices[0]) * Vulkan::Renderer::Vertices.size();
-
-    VkBuffer StagingBuffer;
-    VkDeviceMemory StagingBufferMemory;
-
-    Vulkan::Renderer::CreateBuffer(BufferSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, StagingBuffer, StagingBufferMemory);
-
-    void* Data;
-    vkMapMemory(Vulkan::Renderer::Device, StagingBufferMemory, 0, BufferSize, 0, &Data);
-        memcpy(Data, Vulkan::Renderer::Vertices.data(), (size_t) BufferSize);
-    vkUnmapMemory(Vulkan::Renderer::Device, StagingBufferMemory);
-
-    Vulkan::Renderer::CreateBuffer(BufferSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, Vulkan::Renderer::VertexBuffer, Vulkan::Renderer::VertexBufferMemory);
-
-    Vulkan::Renderer::CopyBuffer(StagingBuffer, Vulkan::Renderer::VertexBuffer, BufferSize);
-
-    vkDestroyBuffer(Vulkan::Renderer::Device, StagingBuffer, nullptr);
-    vkFreeMemory(Vulkan::Renderer::Device, StagingBufferMemory, nullptr);
-}
-
-void Vulkan::Renderer::CreateIndexBuffer()
-{
-    VkDeviceSize BufferSize = sizeof(Vulkan::Renderer::Indices[0]) * Vulkan::Renderer::Indices.size();
-
-    VkBuffer StagingBuffer;
-    VkDeviceMemory StagingBufferMemory;
-
-    Vulkan::Renderer::CreateBuffer(BufferSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, StagingBuffer, StagingBufferMemory);
-
-    void* Data;
-    vkMapMemory(Vulkan::Renderer::Device, StagingBufferMemory, 0, BufferSize, 0, &Data);
-    memcpy(Data, Vulkan::Renderer::Indices.data(), (size_t)BufferSize);
-    vkUnmapMemory(Vulkan::Renderer::Device, StagingBufferMemory);
-
-    Vulkan::Renderer::CreateBuffer(BufferSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, Vulkan::Renderer::IndexBuffer, Vulkan::Renderer::IndexBufferMemory);
-
-    Vulkan::Renderer::CopyBuffer(StagingBuffer, Vulkan::Renderer::IndexBuffer, BufferSize);
-
-    vkDestroyBuffer(Vulkan::Renderer::Device, StagingBuffer, nullptr);
-    vkFreeMemory(Vulkan::Renderer::Device, StagingBufferMemory, nullptr);
 }
 
 void Vulkan::Renderer::CreateUniformBuffers()
